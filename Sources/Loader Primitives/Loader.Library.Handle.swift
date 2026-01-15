@@ -30,6 +30,7 @@ extension Loader.Library {
     ///
     /// - POSIX: wraps `void*` from `dlopen`
     /// - Windows: wraps `HMODULE` from `LoadLibrary`
+    @unsafe
     public struct Handle: @unchecked Sendable, Equatable {
         /// The underlying platform-specific handle.
         ///
@@ -42,7 +43,11 @@ extension Loader.Library {
         /// - Parameter rawValue: The platform-specific handle value.
         @inlinable
         public init(rawValue: UnsafeMutableRawPointer) {
-            self.rawValue = rawValue
+            unsafe (self.rawValue = rawValue)
+        }
+
+        public static func == (lhs: Self, rhs: Self) -> Bool {
+            unsafe lhs.rawValue == rhs.rawValue
         }
     }
 }

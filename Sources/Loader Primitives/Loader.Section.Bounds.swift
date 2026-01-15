@@ -37,6 +37,7 @@ extension Loader.Section {
     /// The buffer provides direct access to the section's raw bytes.
     /// Callers must interpret the contents according to the section's
     /// expected format (e.g., array of test content records).
+    @unsafe
     public struct Bounds: Sendable {
         /// The base address of the image containing this section.
         ///
@@ -72,8 +73,8 @@ extension Loader.Section {
             imageAddress: UnsafeRawPointer?,
             buffer: UnsafeRawBufferPointer
         ) {
-            self.imageAddress = imageAddress
-            self.buffer = buffer
+            unsafe (self.imageAddress = imageAddress)
+            unsafe (self.buffer = buffer)
         }
     }
 }

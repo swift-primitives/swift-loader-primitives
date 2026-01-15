@@ -135,11 +135,11 @@ extension Loader.Section.Name.Representation {
     public static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
         case let (.machO(lSeg, lSect), .machO(rSeg, rSect)):
-            return lSeg.utf8Start == rSeg.utf8Start && lSect.utf8Start == rSect.utf8Start
+            return unsafe lSeg.utf8Start == rSeg.utf8Start && lSect.utf8Start == rSect.utf8Start
         case let (.elf(lSect), .elf(rSect)):
-            return lSect.utf8Start == rSect.utf8Start
+            return unsafe lSect.utf8Start == rSect.utf8Start
         case let (.pe(lSect), .pe(rSect)):
-            return lSect.utf8Start == rSect.utf8Start
+            return unsafe lSect.utf8Start == rSect.utf8Start
         default:
             return false
         }
@@ -150,14 +150,14 @@ extension Loader.Section.Name.Representation {
         switch self {
         case let .machO(seg, sect):
             hasher.combine(0)
-            hasher.combine(Int(bitPattern: seg.utf8Start))
-            hasher.combine(Int(bitPattern: sect.utf8Start))
+            hasher.combine(unsafe Int(bitPattern: seg.utf8Start))
+            hasher.combine(unsafe Int(bitPattern: sect.utf8Start))
         case let .elf(sect):
             hasher.combine(1)
-            hasher.combine(Int(bitPattern: sect.utf8Start))
+            hasher.combine(unsafe Int(bitPattern: sect.utf8Start))
         case let .pe(sect):
             hasher.combine(2)
-            hasher.combine(Int(bitPattern: sect.utf8Start))
+            hasher.combine(unsafe Int(bitPattern: sect.utf8Start))
         }
     }
 }
