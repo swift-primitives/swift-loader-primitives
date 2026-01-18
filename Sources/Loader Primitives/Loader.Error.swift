@@ -9,12 +9,16 @@
 //
 // ===----------------------------------------------------------------------===//
 
+public import String_Primitives
+public import Reference_Primitives
+public import ASCII
+
 extension Loader {
     /// Errors from dynamic loader operations.
     ///
     /// Captures error information from platform loader APIs
     /// (dlerror on POSIX, GetLastError on Windows).
-    public enum Error: Swift.Error, Sendable, Equatable {
+    public enum Error: Swift.Error, Sendable {
         /// Failed to open a dynamic library.
         ///
         /// - Parameter message: Platform-specific error message.
@@ -43,17 +47,35 @@ extension Loader {
     /// Error message from loader operations.
     ///
     /// Captures the error message from dlerror() or Windows GetLastError.
-    public struct Message: Sendable, Equatable, CustomStringConvertible {
-        /// The error message text.
-        public let text: String
+    /// Stores the message as a boxed platform string for copyability across error handling.
+    ///
+    /// - Note: `CustomStringConvertible` conformance is provided in Foundations
+    ///   via swift-strings bridging.
+    public struct Message: Sendable {
+        /// The error message text as a boxed platform string.
+        public let text: Reference.Box<String_Primitives.String>
 
-        /// Creates an error message.
+        /// Creates an error message from a platform string.
         ///
         /// - Parameter text: The error message text.
-        public init(_ text: String) {
-            self.text = text
+        public init(_ text: consuming String_Primitives.String) {
+            self.text = Reference.Box(text)
         }
 
-        public var description: String { text }
+        /// Creates an error message from an ASCII string literal.
+        ///
+        /// - Parameter literal: The string literal. Must contain only ASCII characters.
+        @inlinable
+        public init(ascii literal: StaticString) {
+            self.text = Reference.Box(String_Primitives.String(ascii: literal))
+        }
+
+        /// Creates an error message by copying from a C string view.
+        ///
+        /// - Parameter view: A borrowed view of a null-terminated C string.
+        @unsafe
+        public init(copying view: borrowing String_Primitives.String.View) {
+            self.text = Reference.Box(String_Primitives.String(copying: view))
+        }
     }
 }

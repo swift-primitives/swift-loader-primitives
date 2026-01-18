@@ -17,9 +17,19 @@ let package = Package(
             targets: ["Loader_Primitives"]
         ),
     ],
+    dependencies: [
+        .package(path: "../swift-string-primitives"),
+        .package(path: "../swift-reference-primitives"),
+        .package(path: "../../swift-foundations/swift-ascii"),
+    ],
     targets: [
         .target(
             name: "Loader_Primitives",
+            dependencies: [
+                .product(name: "String Primitives", package: "swift-string-primitives"),
+                .product(name: "Reference Primitives", package: "swift-reference-primitives"),
+                .product(name: "ASCII", package: "swift-ascii"),
+            ],
             path: "Sources/Loader Primitives"
         ),
     ],
