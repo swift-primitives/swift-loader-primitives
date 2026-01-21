@@ -20,7 +20,7 @@ let package = Package(
     dependencies: [
         .package(path: "../swift-string-primitives"),
         .package(path: "../swift-reference-primitives"),
-        .package(path: "../../swift-foundations/swift-ascii"),
+        .package(path: "../swift-ascii-primitives"),
     ],
     targets: [
         .target(
@@ -28,7 +28,7 @@ let package = Package(
             dependencies: [
                 .product(name: "String Primitives", package: "swift-string-primitives"),
                 .product(name: "Reference Primitives", package: "swift-reference-primitives"),
-                .product(name: "ASCII", package: "swift-ascii"),
+                .product(name: "ASCII Primitives", package: "swift-ascii-primitives"),
             ],
             path: "Sources/Loader Primitives"
         ),

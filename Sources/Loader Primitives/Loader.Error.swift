@@ -11,7 +11,7 @@
 
 public import String_Primitives
 public import Reference_Primitives
-public import ASCII
+public import ASCII_Primitives
 
 extension Loader {
     /// Errors from dynamic loader operations.
