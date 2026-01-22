@@ -30,6 +30,10 @@ extension Loader.Library {
     ///
     /// - POSIX: wraps `void*` from `dlopen`
     /// - Windows: wraps `HMODULE` from `LoadLibrary`
+    ///
+    // SAFETY: Handle wraps an immutable raw pointer. The pointer value itself
+    // can be safely shared across threads. Callers must externally synchronize
+    // close() vs in-flight symbol lookups on the same handle.
     @unsafe
     public struct Handle: @unchecked Sendable, Equatable {
         /// The underlying platform-specific handle.
