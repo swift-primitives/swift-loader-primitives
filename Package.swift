@@ -21,6 +21,10 @@ let package = Package(
         .package(path: "../swift-string-primitives"),
         .package(path: "../swift-reference-primitives"),
         .package(path: "../swift-ascii-primitives"),
+        // Semantic dependency: loader errors are platform error codes (errno/GetLastError)
+        // .package(path: "../swift-error-primitives"),
+        // Semantic dependency: library handles have scoped lifetimes
+        // .package(path: "../swift-lifetime-primitives"),
     ],
     targets: [
         .target(
@@ -29,6 +33,8 @@ let package = Package(
                 .product(name: "String Primitives", package: "swift-string-primitives"),
                 .product(name: "Reference Primitives", package: "swift-reference-primitives"),
                 .product(name: "ASCII Primitives", package: "swift-ascii-primitives"),
+                // .product(name: "Error Primitives", package: "swift-error-primitives"),
+                // .product(name: "Lifetime Primitives", package: "swift-lifetime-primitives"),
             ],
             path: "Sources/Loader Primitives"
         ),
