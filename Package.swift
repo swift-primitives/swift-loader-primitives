@@ -21,9 +21,9 @@ let package = Package(
         .package(path: "../swift-string-primitives"),
         .package(path: "../swift-reference-primitives"),
         .package(path: "../swift-ascii-primitives"),
-        // Semantic dependency: loader errors are platform error codes (errno/GetLastError)
+        // SDG(wraps): loader errors wrap platform error codes (errno/GetLastError)
         // .package(path: "../swift-error-primitives"),
-        // Semantic dependency: library handles have scoped lifetimes
+        // SDG(wraps): library handles wrap scoped lifetimes
         // .package(path: "../swift-lifetime-primitives"),
     ],
     targets: [
