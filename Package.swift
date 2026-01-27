@@ -19,7 +19,7 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../swift-string-primitives"),
-        .package(path: "../swift-reference-primitives"),
+        .package(path: "../swift-ownership-primitives"),
         .package(path: "../swift-ascii-primitives"),
         // SDG(wraps): loader errors wrap platform error codes (errno/GetLastError)
         // .package(path: "../swift-error-primitives"),
@@ -31,7 +31,7 @@ let package = Package(
             name: "Loader_Primitives",
             dependencies: [
                 .product(name: "String Primitives", package: "swift-string-primitives"),
-                .product(name: "Reference Primitives", package: "swift-reference-primitives"),
+                .product(name: "Ownership Primitives", package: "swift-ownership-primitives"),
                 .product(name: "ASCII Primitives", package: "swift-ascii-primitives"),
                 // .product(name: "Error Primitives", package: "swift-error-primitives"),
                 // .product(name: "Lifetime Primitives", package: "swift-lifetime-primitives"),
