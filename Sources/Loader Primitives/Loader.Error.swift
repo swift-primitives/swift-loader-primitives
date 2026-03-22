@@ -11,7 +11,7 @@
 
 public import String_Primitives
 public import Ownership_Primitives
-public import ASCII_Primitives
+internal import ASCII_Primitives
 
 extension Loader {
     /// Errors from dynamic loader operations.
