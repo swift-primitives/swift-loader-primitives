@@ -35,6 +35,11 @@ extension Loader.Library {
     // can be safely shared across threads. Callers must externally synchronize
     // close() vs in-flight symbol lookups on the same handle.
     @unsafe
+    // WHY: Category D — structural Sendable workaround (SP-5).
+    // WHY: Wraps immutable raw pointer (dlopen handle / HMODULE). The pointer
+    // WHY: value itself is safe to share. UnsafeMutableRawPointer blocks inference.
+    // WHEN TO REMOVE: When compiler gains structural Sendable through raw pointers.
+    // TRACKING: unsafe-audit-findings.md Category D SP-5.
     public struct Handle: @unchecked Sendable, Equatable {
         /// The underlying platform-specific handle.
         ///
