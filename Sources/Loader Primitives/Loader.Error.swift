@@ -70,11 +70,11 @@ extension Loader {
             self.text = Ownership.Shared(String_Primitives.String(ascii: literal))
         }
 
-        /// Creates an error message by copying from a C string view.
+        /// Creates an error message by copying from a borrowed C string view.
         ///
         /// - Parameter view: A borrowed view of a null-terminated C string.
         @unsafe
-        public init(copying view: borrowing String_Primitives.String.View) {
+        public init(copying view: borrowing String_Primitives.String.Borrowed) {
             self.text = Ownership.Shared(String_Primitives.String(copying: view))
         }
     }
