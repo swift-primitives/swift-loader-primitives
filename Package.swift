@@ -23,8 +23,6 @@ let package = Package(
         .package(path: "../swift-ascii-primitives"),
         // SDG(wraps): loader errors wrap platform error codes (errno/GetLastError)
         // .package(path: "../swift-error-primitives"),
-        // SDG(wraps): library handles wrap scoped lifetimes
-        // .package(path: "../swift-lifetime-primitives"),
     ],
     targets: [
         .target(
@@ -34,7 +32,6 @@ let package = Package(
                 .product(name: "Ownership Primitives", package: "swift-ownership-primitives"),
                 .product(name: "ASCII Primitives", package: "swift-ascii-primitives"),
                 // .product(name: "Error Primitives", package: "swift-error-primitives"),
-                // .product(name: "Lifetime Primitives", package: "swift-lifetime-primitives"),
             ],
             path: "Sources/Loader Primitives"
         ),
