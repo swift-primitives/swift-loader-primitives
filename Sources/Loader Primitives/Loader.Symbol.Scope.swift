@@ -26,6 +26,7 @@ extension Loader.Symbol {
     /// - For `.default`/`.next`: lookups are not tied to a specific library lifetime,
     ///   but returned pointers can be invalidated by unloading a library that owns the symbol
     /// - **Never assume** `.default` means "stable forever"
+    @unsafe
     public enum Scope: Sendable, Equatable {
         /// Search in a specific loaded library.
         ///
@@ -44,5 +45,22 @@ extension Loader.Symbol {
         /// Used for interposition/wrapping: finds the next occurrence
         /// of a symbol in the load order after the current object.
         case next
+
+        /// Returns a Boolean value indicating whether two lookup scopes are equal.
+        public static func == (lhs: Self, rhs: Self) -> Bool {
+            switch unsafe (lhs, rhs) {
+            case (.handle(let lh), .handle(let rh)):
+                return unsafe lh == rh
+
+            case (.default, .default):
+                return true
+
+            case (.next, .next):
+                return true
+
+            default:
+                return false
+            }
+        }
     }
 }

@@ -10,6 +10,15 @@
 // ===----------------------------------------------------------------------===//
 
 extension Loader.Library {
+    // SAFETY: Handle wraps an immutable raw pointer. The pointer value itself
+    // can be safely shared across threads. Callers must externally synchronize
+    // close() vs in-flight symbol lookups on the same handle.
+    //
+    // WHY: Category D — structural Sendable workaround (SP-5).
+    // WHY: Wraps immutable raw pointer (dlopen handle / HMODULE). The pointer
+    // WHY: value itself is safe to share. UnsafeMutableRawPointer blocks inference.
+    // WHEN TO REMOVE: When compiler gains structural Sendable through raw pointers.
+    // TRACKING: unsafe-audit-findings.md Category D SP-5.
     /// Opaque handle to a loaded dynamic library.
     ///
     /// Returned by `open`, consumed by `close`. This type represents
@@ -30,6 +39,7 @@ extension Loader.Library {
     ///
     /// - POSIX: wraps `void*` from `dlopen`
     /// - Windows: wraps `HMODULE` from `LoadLibrary`
+    @unsafe
     public struct Handle: @unchecked Sendable, Equatable {
         /// The underlying platform-specific handle.
         ///
@@ -42,7 +52,12 @@ extension Loader.Library {
         /// - Parameter rawValue: The platform-specific handle value.
         @inlinable
         public init(rawValue: UnsafeMutableRawPointer) {
-            self.rawValue = rawValue
+            unsafe (self.rawValue = rawValue)
+        }
+
+        /// Returns a Boolean value indicating whether two handles wrap the same underlying pointer.
+        public static func == (lhs: Self, rhs: Self) -> Bool {
+            unsafe lhs.rawValue == rhs.rawValue
         }
     }
 }

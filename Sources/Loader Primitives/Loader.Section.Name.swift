@@ -12,9 +12,11 @@
 extension Loader.Section {
     /// Identifies a section within a binary image.
     ///
-    /// Platform-specific section identifiers are provided by the internal
-    /// representation. Use well-known constants like `.swiftTestContent`
-    /// for portable code.
+    /// A name carries the section's identifier in every binary format it is defined
+    /// for — Mach-O, ELF, and PE — as cross-platform data. Selecting the right one is
+    /// the responsibility of the platform package that consumes it (it reads the
+    /// `machO`, `elf`, or `pe` accessor for its own format), not of this primitive.
+    /// Use well-known constants like `.swiftTestContent` for portable code.
     ///
     /// ## Platform Representation
     ///
@@ -24,20 +26,27 @@ extension Loader.Section {
     /// | Linux    | Section name (e.g., `swift5_tests`) |
     /// | Windows  | Section name (e.g., `.sw5test$B`) |
     public struct Name: Sendable, Equatable, Hashable {
-        /// Internal representation - opaque to callers.
+        /// The Mach-O (segment, section) identifier, or `nil` if undefined for this name.
         @usableFromInline
-        internal let _representation: Representation
+        internal let _machO: (segment: StaticString, section: StaticString)?
 
+        /// The ELF section identifier, or `nil` if undefined for this name.
         @usableFromInline
-        internal enum Representation: Sendable, Equatable, Hashable {
-            case machO(segment: StaticString, section: StaticString)
-            case elf(section: StaticString)
-            case pe(section: StaticString)
-        }
+        internal let _elf: StaticString?
+
+        /// The PE section identifier, or `nil` if undefined for this name.
+        @usableFromInline
+        internal let _pe: StaticString?
 
         @inlinable
-        internal init(_representation: Representation) {
-            self._representation = _representation
+        internal init(
+            machO: (segment: StaticString, section: StaticString)? = nil,
+            elf: StaticString? = nil,
+            pe: StaticString? = nil
+        ) {
+            self._machO = machO
+            self._elf = elf
+            self._pe = pe
         }
     }
 }
@@ -55,23 +64,19 @@ extension Loader.Section.Name {
     /// | Linux    | `swift5_tests` |
     /// | Windows  | `.sw5test$B` |
     public static var swiftTestContent: Self {
-        #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS) || os(visionOS)
-        return Self(_representation: .machO(segment: "__DATA_CONST", section: "__swift5_tests"))
-        #elseif os(Linux) || os(FreeBSD) || os(OpenBSD) || os(Android)
-        return Self(_representation: .elf(section: "swift5_tests"))
-        #elseif os(Windows)
-        return Self(_representation: .pe(section: ".sw5test$B"))
-        #else
-        return Self(_representation: .elf(section: "swift5_tests"))
-        #endif
+        Self(
+            machO: (segment: "__DATA_CONST", section: "__swift5_tests"),
+            elf: "swift5_tests",
+            pe: ".sw5test$B"
+        )
     }
 
     /// Fallback test content section for older Darwin binaries.
     ///
     /// Some older binaries use `__DATA` instead of `__DATA_CONST`.
-    /// This is Darwin-specific and should only be used as a fallback.
+    /// This is Darwin-specific, so only the Mach-O representation is defined.
     public static var swiftTestContentFallback: Self {
-        Self(_representation: .machO(segment: "__DATA", section: "__swift5_tests"))
+        Self(machO: (segment: "__DATA", section: "__swift5_tests"))
     }
 
     /// Swift type metadata section.
@@ -84,80 +89,81 @@ extension Loader.Section.Name {
     /// | Linux    | `swift5_type_metadata` |
     /// | Windows  | `.sw5tymd` |
     public static var swiftTypeMetadata: Self {
-        #if os(macOS) || os(iOS) || os(tvOS) || os(watchOS) || os(visionOS)
-        return Self(_representation: .machO(segment: "__TEXT", section: "__swift5_types"))
-        #elseif os(Linux) || os(FreeBSD) || os(OpenBSD) || os(Android)
-        return Self(_representation: .elf(section: "swift5_type_metadata"))
-        #elseif os(Windows)
-        return Self(_representation: .pe(section: ".sw5tymd"))
-        #else
-        return Self(_representation: .elf(section: "swift5_type_metadata"))
-        #endif
+        Self(
+            machO: (segment: "__TEXT", section: "__swift5_types"),
+            elf: "swift5_type_metadata",
+            pe: ".sw5tymd"
+        )
     }
 }
 
-// MARK: - Platform-Specific Accessors
+// MARK: - Per-Format Accessors
 
 extension Loader.Section.Name {
-    /// For Darwin: extracts segment and section names.
+    /// The Mach-O segment and section, or `nil` if no Mach-O identifier is defined.
     ///
-    /// - Returns: Tuple of segment and section names, or `nil` if this
-    ///   is not a Mach-O section name.
+    /// Read by Darwin platform packages to locate the section in a Mach-O image.
     @inlinable
     public var machO: (segment: StaticString, section: StaticString)? {
-        guard case .machO(let seg, let sect) = _representation else { return nil }
-        return (seg, sect)
+        _machO
     }
 
-    /// For Linux/ELF: extracts section name.
+    /// The ELF section name, or `nil` if no ELF identifier is defined.
     ///
-    /// - Returns: The section name, or `nil` if this is not an ELF section name.
+    /// Read by Linux platform packages to locate the section in an ELF image.
     @inlinable
     public var elf: StaticString? {
-        guard case .elf(let sect) = _representation else { return nil }
-        return sect
+        _elf
     }
 
-    /// For Windows/PE: extracts section name.
+    /// The PE section name, or `nil` if no PE identifier is defined.
     ///
-    /// - Returns: The section name, or `nil` if this is not a PE section name.
+    /// Read by Windows platform packages to locate the section in a PE image.
     @inlinable
     public var pe: StaticString? {
-        guard case .pe(let sect) = _representation else { return nil }
-        return sect
+        _pe
     }
 }
 
-// MARK: - Equatable/Hashable for StaticString
+// MARK: - Equatable/Hashable over StaticString
 
-extension Loader.Section.Name.Representation {
+extension Loader.Section.Name {
+    /// Returns a Boolean value indicating whether two names identify the same section.
     @inlinable
     public static func == (lhs: Self, rhs: Self) -> Bool {
-        switch (lhs, rhs) {
-        case let (.machO(lSeg, lSect), .machO(rSeg, rSect)):
-            return lSeg.utf8Start == rSeg.utf8Start && lSect.utf8Start == rSect.utf8Start
-        case let (.elf(lSect), .elf(rSect)):
-            return lSect.utf8Start == rSect.utf8Start
-        case let (.pe(lSect), .pe(rSect)):
-            return lSect.utf8Start == rSect.utf8Start
-        default:
-            return false
+        _same(lhs._machO?.segment, rhs._machO?.segment)
+            && _same(lhs._machO?.section, rhs._machO?.section)
+            && _same(lhs._elf, rhs._elf)
+            && _same(lhs._pe, rhs._pe)
+    }
+
+    /// Hashes the essential components of this name into the given hasher.
+    @inlinable
+    public func hash(into hasher: inout Hasher) {
+        if let machO = _machO {
+            hasher.combine(unsafe Int(bitPattern: machO.segment.utf8Start))
+            hasher.combine(unsafe Int(bitPattern: machO.section.utf8Start))
+        }
+        if let elf = _elf {
+            hasher.combine(unsafe Int(bitPattern: elf.utf8Start))
+        }
+        if let pe = _pe {
+            hasher.combine(unsafe Int(bitPattern: pe.utf8Start))
         }
     }
 
-    @inlinable
-    public func hash(into hasher: inout Hasher) {
-        switch self {
-        case let .machO(seg, sect):
-            hasher.combine(0)
-            hasher.combine(Int(bitPattern: seg.utf8Start))
-            hasher.combine(Int(bitPattern: sect.utf8Start))
-        case let .elf(sect):
-            hasher.combine(1)
-            hasher.combine(Int(bitPattern: sect.utf8Start))
-        case let .pe(sect):
-            hasher.combine(2)
-            hasher.combine(Int(bitPattern: sect.utf8Start))
+    /// Compares two optional `StaticString` identifiers by their UTF-8 storage address.
+    @usableFromInline
+    internal static func _same(_ lhs: StaticString?, _ rhs: StaticString?) -> Bool {
+        switch (lhs, rhs) {
+        case (nil, nil):
+            return true
+
+        case (let lhs?, let rhs?):
+            return unsafe lhs.utf8Start == rhs.utf8Start
+
+        default:
+            return false
         }
     }
 }
