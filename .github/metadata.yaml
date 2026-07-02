@@ -1,6 +1,6 @@
 # .github/metadata.yaml
 # Triaged 2026-04-29 — anomaly-fix pass after wave-4 PR-branch triage didn't apply.
-description: "Loader types for Swift."
+description: "Typed vocabulary for dynamic-loader handles, symbol scopes, and bounds-checked section byte access in Swift."
 topics:
   - primitives
   - loader
