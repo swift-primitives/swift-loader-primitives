@@ -53,13 +53,13 @@ extension Loader {
     ///   via swift-strings bridging.
     public struct Message: Sendable {
         /// The error message text as a boxed platform string.
-        public let text: Ownership.Shared<String_Primitives.String>
+        public let text: Ownership.Immutable<String_Primitives.String>
 
         /// Creates an error message from a platform string.
         ///
         /// - Parameter text: The error message text.
         public init(_ text: consuming String_Primitives.String) {
-            self.text = Ownership.Shared(text)
+            self.text = Ownership.Immutable(text)
         }
 
         /// Creates an error message from an ASCII string literal.
@@ -67,7 +67,7 @@ extension Loader {
         /// - Parameter literal: The string literal. Must contain only ASCII characters.
         @inlinable
         public init(ascii literal: StaticString) {
-            self.text = Ownership.Shared(String_Primitives.String(ascii: literal))
+            self.text = Ownership.Immutable(String_Primitives.String(ascii: literal))
         }
 
         /// Creates an error message by copying from a borrowed C string view.
@@ -75,7 +75,7 @@ extension Loader {
         /// - Parameter view: A borrowed view of a null-terminated C string.
         @unsafe
         public init(copying view: borrowing String_Primitives.String.Borrowed) {
-            self.text = Ownership.Shared(String_Primitives.String(copying: view))
+            self.text = Ownership.Immutable(String_Primitives.String(copying: view))
         }
     }
 }
