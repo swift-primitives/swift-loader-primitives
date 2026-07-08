@@ -54,10 +54,12 @@ extension Loader.Library {
         public init(rawValue: UnsafeMutableRawPointer) {
             unsafe (self.rawValue = rawValue)
         }
+    }
+}
 
-        /// Returns a Boolean value indicating whether two handles wrap the same underlying pointer.
-        public static func == (lhs: Self, rhs: Self) -> Bool {
-            unsafe lhs.rawValue == rhs.rawValue
-        }
+extension Loader.Library.Handle {
+    /// Returns a Boolean value indicating whether two handles wrap the same underlying pointer.
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        unsafe lhs.rawValue == rhs.rawValue
     }
 }

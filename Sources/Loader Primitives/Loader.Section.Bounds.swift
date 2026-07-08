@@ -99,94 +99,96 @@ extension Loader.Section {
             unsafe (self.imageAddress = imageAddress)
             unsafe (self.buffer = buffer)
         }
+    }
+}
 
-        // MARK: - Safe Access (Canonical API)
+// MARK: - Safe Access (Canonical API)
 
-        /// Safe, bounds-checked view of the section's raw bytes.
-        ///
-        /// This is the **canonical API** for accessing section data.
-        /// The `RawSpan` provides compiler-enforced lifetime safety and
-        /// bounds checking with zero runtime overhead.
-        ///
-        /// - Returns: A `RawSpan` view of the section's bytes.
-        ///
-        /// ## Example
-        ///
-        /// ```swift
-        /// for bounds in Loader.Section.all(.swiftTestContent) {
-        ///     let span = bounds.span
-        ///     // Process bytes using span.byteCount, span.unsafeLoad, etc.
-        /// }
-        /// ```
-        @inlinable
-        public var span: RawSpan {
-            @_lifetime(borrow self)
-            borrowing get {
-                unsafe RawSpan(_unsafeBytes: buffer)
-            }
+extension Loader.Section.Bounds {
+    /// Safe, bounds-checked view of the section's raw bytes.
+    ///
+    /// This is the **canonical API** for accessing section data.
+    /// The `RawSpan` provides compiler-enforced lifetime safety and
+    /// bounds checking with zero runtime overhead.
+    ///
+    /// - Returns: A `RawSpan` view of the section's bytes.
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// for bounds in Loader.Section.all(.swiftTestContent) {
+    ///     let span = bounds.span
+    ///     // Process bytes using span.byteCount, span.unsafeLoad, etc.
+    /// }
+    /// ```
+    @inlinable
+    public var span: RawSpan {
+        @_lifetime(borrow self)
+        borrowing get {
+            unsafe RawSpan(_unsafeBytes: buffer)
         }
+    }
 
-        /// Provides safe, bounds-checked access to the section's bytes
-        /// within a closure.
-        ///
-        /// Use this method when the property-based `span` accessor
-        /// encounters lifetime issues in complex control flow.
-        ///
-        /// - Parameter body: A closure that receives the span.
-        /// - Returns: The value returned by the closure.
-        /// - Throws: Any error thrown by the closure.
-        ///
-        /// ## Example
-        ///
-        /// ```swift
-        /// for bounds in Loader.Section.all(.swiftTestContent) {
-        ///     bounds.withSpan { span in
-        ///         // Process span within this scope
-        ///         for i in 0..<span.byteCount {
-        ///             let byte: UInt8 = unsafe span.unsafeLoad(fromByteOffset: i, as: UInt8.self)
-        ///             // ...
-        ///         }
-        ///     }
-        /// }
-        /// ```
-        @inlinable
-        public borrowing func withSpan<R, E: Swift.Error>(
-            _ body: (RawSpan) throws(E) -> R
-        ) throws(E) -> R {
-            try body(span)
-        }
+    /// Provides safe, bounds-checked access to the section's bytes
+    /// within a closure.
+    ///
+    /// Use this method when the property-based `span` accessor
+    /// encounters lifetime issues in complex control flow.
+    ///
+    /// - Parameter body: A closure that receives the span.
+    /// - Returns: The value returned by the closure.
+    /// - Throws: Any error thrown by the closure.
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// for bounds in Loader.Section.all(.swiftTestContent) {
+    ///     bounds.withSpan { span in
+    ///         // Process span within this scope
+    ///         for i in 0..<span.byteCount {
+    ///             let byte: UInt8 = unsafe span.unsafeLoad(fromByteOffset: i, as: UInt8.self)
+    ///             // ...
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    @inlinable
+    public borrowing func withSpan<R, E: Swift.Error>(
+        _ body: (RawSpan) throws(E) -> R
+    ) throws(E) -> R {
+        try body(span)
+    }
 
-        /// Safe, bounds-checked view of the section's bytes as typed elements.
-        ///
-        /// Use this when you need typed element access. For raw byte access,
-        /// use the `span` property or `withSpan(_:)` method.
-        ///
-        /// - Parameter body: A closure that receives the typed span.
-        /// - Returns: The value returned by the closure.
-        /// - Throws: Any error thrown by the closure.
-        ///
-        /// ## Example
-        ///
-        /// ```swift
-        /// for bounds in Loader.Section.all(.swiftTestContent) {
-        ///     bounds.withBytes { bytes in
-        ///         for byte in bytes {
-        ///             // Process each byte safely
-        ///         }
-        ///     }
-        /// }
-        /// ```
-        @inlinable
-        public borrowing func withBytes<R, E: Swift.Error>(
-            _ body: (Swift.Span<UInt8>) throws(E) -> R
-        ) throws(E) -> R {
-            guard let baseAddress = unsafe buffer.baseAddress else {
-                let emptySpan = Swift.Span<UInt8>()
-                return try body(emptySpan)
-            }
-            let pointer = unsafe baseAddress.assumingMemoryBound(to: UInt8.self)
-            let span = unsafe Span(_unsafeStart: pointer, count: buffer.count)
-            return try body(span)
+    /// Safe, bounds-checked view of the section's bytes as typed elements.
+    ///
+    /// Use this when you need typed element access. For raw byte access,
+    /// use the `span` property or `withSpan(_:)` method.
+    ///
+    /// - Parameter body: A closure that receives the typed span.
+    /// - Returns: The value returned by the closure.
+    /// - Throws: Any error thrown by the closure.
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// for bounds in Loader.Section.all(.swiftTestContent) {
+    ///     bounds.withBytes { bytes in
+    ///         for byte in bytes {
+    ///             // Process each byte safely
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    @inlinable
+    public borrowing func withBytes<R, E: Swift.Error>(
+        _ body: (Swift.Span<UInt8>) throws(E) -> R
+    ) throws(E) -> R {
+        guard let baseAddress = unsafe buffer.baseAddress else {
+            let emptySpan = Swift.Span<UInt8>()
+            return try body(emptySpan)
         }
+        let pointer = unsafe baseAddress.assumingMemoryBound(to: UInt8.self)
+        let span = unsafe Span(_unsafeStart: pointer, count: buffer.count)
+        return try body(span)
     }
 }

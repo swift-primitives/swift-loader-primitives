@@ -45,22 +45,24 @@ extension Loader.Symbol {
         /// Used for interposition/wrapping: finds the next occurrence
         /// of a symbol in the load order after the current object.
         case next
+    }
+}
 
-        /// Returns a Boolean value indicating whether two lookup scopes are equal.
-        public static func == (lhs: Self, rhs: Self) -> Bool {
-            switch unsafe (lhs, rhs) {
-            case (.handle(let lh), .handle(let rh)):
-                return unsafe lh == rh
+extension Loader.Symbol.Scope {
+    /// Returns a Boolean value indicating whether two lookup scopes are equal.
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        switch unsafe (lhs, rhs) {
+        case (.handle(let lh), .handle(let rh)):
+            return unsafe lh == rh
 
-            case (.default, .default):
-                return true
+        case (.default, .default):
+            return true
 
-            case (.next, .next):
-                return true
+        case (.next, .next):
+            return true
 
-            default:
-                return false
-            }
+        default:
+            return false
         }
     }
 }

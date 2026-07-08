@@ -39,7 +39,7 @@ extension Loader.Section {
         internal let _pe: StaticString?
 
         @inlinable
-        internal init(
+        package init(
             machO: (segment: StaticString, section: StaticString)? = nil,
             elf: StaticString? = nil,
             pe: StaticString? = nil
