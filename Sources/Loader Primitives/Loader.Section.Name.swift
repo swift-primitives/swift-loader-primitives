@@ -138,21 +138,33 @@ extension Loader.Section.Name {
     }
 
     /// Hashes the essential components of this name into the given hasher.
+    ///
+    /// Hashing feeds the UTF-8 contents of each defined identifier, matching
+    /// ``==(_:_:)``: equal names hash equally regardless of where their
+    /// storage lives.
     @inlinable
     public func hash(into hasher: inout Hasher) {
         if let machO = _machO {
-            hasher.combine(unsafe Int(bitPattern: machO.segment.utf8Start))
-            hasher.combine(unsafe Int(bitPattern: machO.section.utf8Start))
+            Self._hash(machO.segment, into: &hasher)
+            Self._hash(machO.section, into: &hasher)
         }
         if let elf = _elf {
-            hasher.combine(unsafe Int(bitPattern: elf.utf8Start))
+            Self._hash(elf, into: &hasher)
         }
         if let pe = _pe {
-            hasher.combine(unsafe Int(bitPattern: pe.utf8Start))
+            Self._hash(pe, into: &hasher)
         }
     }
 
-    /// Compares two optional `StaticString` identifiers by their UTF-8 storage address.
+    /// Feeds a `StaticString` identifier's UTF-8 contents into the hasher.
+    @usableFromInline
+    internal static func _hash(_ string: StaticString, into hasher: inout Hasher) {
+        string.withUTF8Buffer { bytes in
+            unsafe hasher.combine(bytes: UnsafeRawBufferPointer(bytes))
+        }
+    }
+
+    /// Compares two optional `StaticString` identifiers by their UTF-8 contents.
     @usableFromInline
     internal static func _same(_ lhs: StaticString?, _ rhs: StaticString?) -> Bool {
         switch (lhs, rhs) {
@@ -160,7 +172,11 @@ extension Loader.Section.Name {
             return true
 
         case (let lhs?, let rhs?):
-            return unsafe lhs.utf8Start == rhs.utf8Start
+            return lhs.withUTF8Buffer { lhsBytes in
+                rhs.withUTF8Buffer { rhsBytes in
+                    unsafe lhsBytes.elementsEqual(rhsBytes)
+                }
+            }
 
         default:
             return false
