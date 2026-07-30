@@ -46,8 +46,8 @@ extension Loader.Section.Name {
             // inline (no pointer representation), so the two identifiers are
             // guaranteed to be backed by distinct storage. Address-based
             // comparison cannot even inspect the scalar form.
-            // swift-linter:disable:next compiler_protocol_init
             // REASON: deliberately constructing the scalar-literal storage form to prove content equality is independent of representation.
+            // swiftlint:disable:next compiler_protocol_init
             let inline = Loader.Section.Name(elf: StaticString(unicodeScalarLiteral: "t"))
             let pointer = Loader.Section.Name(elf: "t")
 
