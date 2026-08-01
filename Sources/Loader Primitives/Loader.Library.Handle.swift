@@ -60,6 +60,8 @@ extension Loader.Library {
 extension Loader.Library.Handle {
     /// Returns a Boolean value indicating whether two handles wrap the same underlying pointer.
     public static func == (lhs: Self, rhs: Self) -> Bool {
+        // swift-linter:disable:next raw value access
+        // REASON: same-package Equatable conformance for the raw-pointer wrapper's own boundary [CONV-001].
         unsafe lhs.rawValue == rhs.rawValue
     }
 }

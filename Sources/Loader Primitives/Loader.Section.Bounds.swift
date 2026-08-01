@@ -70,6 +70,7 @@ extension Loader.Section {
         /// May be `nil` for statically-linked images or when the
         /// image address is unavailable.
         @unsafe
+        // SAFETY: assigned once in init and never mutated; valid only during iteration per type doc.
         nonisolated(unsafe) public let imageAddress: UnsafeRawPointer?
 
         /// The section's memory buffer (unsafe escape hatch).
@@ -84,6 +85,7 @@ extension Loader.Section {
         /// are responsible for interpreting the contents according
         /// to the section's expected format.
         @unsafe
+        // SAFETY: assigned once in init and never mutated; valid only during iteration per type doc.
         nonisolated(unsafe) public let buffer: UnsafeRawBufferPointer
 
         /// Creates section bounds.
