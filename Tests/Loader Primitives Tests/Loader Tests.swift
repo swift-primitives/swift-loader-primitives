@@ -41,7 +41,8 @@ extension Loader.Section.Name {
             #expect(reconstructed.hashValue == Loader.Section.Name.swiftTestContent.hashValue)
         }
 
-        @Test func `equal content across storage representations compares equal and hashes equal`() {
+        @Test func `equal content across storage representations compares equal and hashes equal`()
+        {
             // A unicode-scalar-literal StaticString stores its contents
             // inline (no pointer representation), so the two identifiers are
             // guaranteed to be backed by distinct storage. Address-based
@@ -67,7 +68,9 @@ extension Loader.Section.Name {
         }
 
         @Test func `defined and undefined identifiers compare unequal`() {
-            let machOOnly = Loader.Section.Name(machO: (segment: "__DATA", section: "__swift5_tests"))
+            let machOOnly = Loader.Section.Name(
+                machO: (segment: "__DATA", section: "__swift5_tests")
+            )
             let elfOnly = Loader.Section.Name(elf: "swift5_tests")
 
             #expect(machOOnly != elfOnly)
