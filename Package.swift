@@ -1,26 +1,35 @@
-// swift-tools-version: 6.3.3
+// swift-tools-version: 6.4
 
 import PackageDescription
 
 let package = Package(
     name: "swift-loader-primitives",
     platforms: [
-        .macOS("27"),
-        .iOS("27"),
-        .tvOS("27"),
-        .watchOS("27"),
-        .visionOS("27"),
+        .macOS(.v27),
+        .iOS(.v27),
+        .tvOS(.v27),
+        .watchOS(.v27),
+        .visionOS(.v27),
     ],
     products: [
         .library(
             name: "Loader Primitives",
             targets: ["Loader_Primitives"]
-        ),
+        )
     ],
     dependencies: [
-        .package(url: "https://github.com/swift-primitives/swift-string-primitives.git", branch: "main"),
-        .package(url: "https://github.com/swift-primitives/swift-ownership-primitives.git", branch: "main"),
-        .package(url: "https://github.com/swift-primitives/swift-ascii-primitives.git", branch: "main"),
+        .package(
+            url: "https://github.com/swift-primitives/swift-string-primitives.git",
+            branch: "main"
+        ),
+        .package(
+            url: "https://github.com/swift-primitives/swift-ownership-primitives.git",
+            branch: "main"
+        ),
+        .package(
+            url: "https://github.com/swift-primitives/swift-ascii-primitives.git",
+            branch: "main"
+        ),
         // SDG(wraps): loader errors wrap platform error codes (errno/GetLastError)
         // .package(url: "https://github.com/swift-primitives/swift-error-primitives.git", branch: "main"),
     ],
@@ -38,7 +47,7 @@ let package = Package(
         .testTarget(
             name: "Loader Primitives Tests",
             dependencies: [
-                "Loader_Primitives",
+                "Loader_Primitives"
             ]
         ),
     ],
