@@ -30,8 +30,7 @@ let package = Package(
             url: "https://github.com/swift-primitives/swift-ascii-primitives.git",
             branch: "main"
         ),
-        // SDG(wraps): loader errors wrap platform error codes (errno/GetLastError)
-        // .package(url: "https://github.com/swift-primitives/swift-error-primitives.git", branch: "main"),
+
     ],
     targets: [
         .target(
@@ -40,7 +39,7 @@ let package = Package(
                 .product(name: "String Primitives", package: "swift-string-primitives"),
                 .product(name: "Ownership Primitives", package: "swift-ownership-primitives"),
                 .product(name: "ASCII Primitives", package: "swift-ascii-primitives"),
-                // .product(name: "Error Primitives", package: "swift-error-primitives"),
+
             ],
             path: "Sources/Loader Primitives"
         ),
